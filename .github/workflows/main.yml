@@ -1,0 +1,57 @@
+name: CI/CD Pipeline 
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  
+
+jobs: 
+  build: 
+    runs-on: ubuntu-latest 
+    steps: 
+        run: 
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    needs: build 
+    if: github.event.pull_request.merged == true 
+    on: 
+  push: 
+    branches: 
+      - main # Change this to your main branch name 
+    steps: 
+      - name: Checkout code 
+        uses: actions/checkout@v2 
+      - name: Set up Java 
+        uses: actions/setup-java@v2  
+        with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+      - name: Build with Maven 
+        run: mvn clean install
+      - name: Test with Maven
+        run: mvn clean test 
+      - name: build and push to docker hub 
+    steps: 
+      - name: Checkout code 
+        uses: actions/checkout@v2 
+      - name: Login to Docker Hub 
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} 
+      - name: Build Docker Image 
+        run: docker build -t myapp:latest123 . 
+      - name: Push Docker Image 
+        run: docker push myapp:latest123
+    steps:
+      - name: Pull image from docker hub
+        run: docker pull <image name>
+      - name: Remove old comtainer
+        run: docker rm -f <image name>
+      - name: Run docker container
+        run: docker run -d -p 5000:5000 <container name> <image name>   
+
+      
+
+
+
+
